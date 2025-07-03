@@ -97,7 +97,7 @@ export default function Home() {
         setIsRunning(true);
         setHasStarted(true);
         setIsTransitioning(false);
-      }, 500);
+      }, 800); // Aumentei para 800ms para transição mais suave
     }
   };
 
@@ -121,7 +121,7 @@ export default function Home() {
     setHasStarted(false);
     setTimeout(() => {
       setIsTransitioning(false);
-    }, 500);
+    }, 800);
   };
 
   // Resetar timer
@@ -164,248 +164,287 @@ export default function Home() {
   const showMinimalUI = hasStarted || isTransitioning;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4 transition-all duration-500">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4 transition-all duration-1000 ease-out">
       {/* Theme Toggle - sempre visível */}
       <div className="absolute top-6 right-6 z-20">
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-lg mx-auto">
-        {showMinimalUI ? (
-          /* UI Minimalista - sem Card, timer flutuando */
-          <div className="transition-all duration-700 ease-in-out transform">
-            {/* Timer Display - maior e sem fundo */}
-            <div className="text-center mb-12">
-              <div className={`font-mono font-light tracking-tight transition-all duration-700 ease-in-out text-9xl sm:text-[12rem] ${
+      <div className="w-full max-w-4xl mx-auto">
+        {/* Card Container - com transição gradual */}
+        <Card className={`shadow-2xl transition-all duration-1000 ease-out ${
+          showMinimalUI 
+            ? 'border-transparent bg-transparent shadow-none' 
+            : 'border bg-card/90 backdrop-blur-sm'
+        }`}>
+          
+          {/* Header - desaparece gradualmente */}
+          <CardHeader className={`text-center pb-4 transition-all duration-700 ease-out ${
+            showMinimalUI 
+              ? 'opacity-0 -translate-y-8 scale-95 max-h-0 overflow-hidden py-0' 
+              : 'opacity-100 translate-y-0 scale-100 max-h-full py-6'
+          }`}>
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="transition-all duration-500">
+                <Clock className="h-4 w-4 mr-1" />
+                Timer
+              </Badge>
+              
+              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Configurações do Timer</DialogTitle>
+                    <DialogDescription>
+                      Ajuste o tempo usando os botões abaixo para evitar erros.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-8 py-6">
+                    {/* Horas */}
+                    <div className="space-y-4">
+                      <div className="text-center font-medium">Horas</div>
+                      <div className="flex items-center justify-center gap-4">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('hours', 'subtract')}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <div className="text-3xl font-mono font-bold w-16 text-center">
+                          {hours.toString().padStart(2, '0')}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('hours', 'add')}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Minutos */}
+                    <div className="space-y-4">
+                      <div className="text-center font-medium">Minutos</div>
+                      <div className="flex items-center justify-center gap-4">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('minutes', 'subtract')}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <div className="text-3xl font-mono font-bold w-16 text-center">
+                          {minutes.toString().padStart(2, '0')}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('minutes', 'add')}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Segundos */}
+                    <div className="space-y-4">
+                      <div className="text-center font-medium">Segundos</div>
+                      <div className="flex items-center justify-center gap-4">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('seconds', 'subtract')}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <div className="text-3xl font-mono font-bold w-16 text-center">
+                          {seconds.toString().padStart(2, '0')}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => adjustTime('seconds', 'add')}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={applySettings}>
+                      Aplicar
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            
+            <CardTitle className="text-3xl font-light text-foreground mt-2">
+              Pomodoro Timer
+            </CardTitle>
+          </CardHeader>
+          
+          <CardContent className={`space-y-8 transition-all duration-800 ease-out ${
+            showMinimalUI 
+              ? 'p-4 sm:p-8' 
+              : 'p-8'
+          }`}>
+            
+            {/* Timer Display - cresce gradualmente */}
+            <div className="text-center">
+              <div className={`font-mono font-light tracking-tight transition-all duration-1000 ease-out transform ${
+                showMinimalUI 
+                  ? 'text-8xl sm:text-9xl md:text-[12rem] scale-110' 
+                  : 'text-7xl sm:text-8xl scale-100'
+              } ${
                 timeLeft <= 10 && timeLeft > 0 ? 'text-destructive animate-pulse' : 'text-foreground'
               }`}>
                 {formatTime(timeLeft)}
               </div>
-              <div className="mt-6 text-2xl text-muted-foreground transition-all duration-500 ease-in-out">
+              
+              {/* Status text com transição */}
+              <div className={`text-muted-foreground transition-all duration-600 ease-out ${
+                showMinimalUI 
+                  ? 'mt-8 text-xl sm:text-2xl' 
+                  : 'mt-3 text-lg'
+              }`}>
                 {timeLeft === 0 ? 
                   "Tempo esgotado! 🎉" : 
-                  isRunning ? "Timer em andamento..." : "Timer pausado"
+                  showMinimalUI ? 
+                    (isRunning ? "Timer em andamento..." : "Timer pausado") :
+                    (timeLeft === totalTimeInSeconds ? "Pronto para iniciar" : "Configure um tempo para começar")
                 }
               </div>
             </div>
 
-            {/* Progress Bar - sem fundo */}
-            <div className="space-y-6 mb-12">
+            {/* Progress Bar - cresce gradualmente */}
+            <div className={`transition-all duration-800 ease-out ${
+              showMinimalUI 
+                ? 'space-y-6 my-12' 
+                : 'space-y-3 my-6'
+            }`}>
               <Progress 
                 value={getProgress()} 
-                className="h-6 transition-all duration-500 bg-muted/50"
-              />
-              <div className="text-center text-lg text-muted-foreground">
-                {Math.round(getProgress())}% concluído
-              </div>
-            </div>
-
-            {/* Controles - maiores */}
-            <div className="flex justify-center gap-6">
-              <Button
-                onClick={toggleTimer}
-                size="lg"
-                className={`px-16 py-8 text-2xl font-medium rounded-full transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 ${
-                  isRunning ? 'bg-yellow-500 hover:bg-yellow-600' : ''
+                className={`transition-all duration-800 ease-out ${
+                  showMinimalUI 
+                    ? 'h-6 bg-muted/30' 
+                    : 'h-3 bg-muted/50'
                 }`}
-              >
-                {isRunning ? (
-                  <>
-                    <Pause className="mr-4 h-8 w-8" />
-                    Pausar
-                  </>
+              />
+              
+              {/* Progress info com transição */}
+              <div className={`text-sm text-muted-foreground transition-all duration-600 ease-out ${
+                showMinimalUI 
+                  ? 'text-center text-lg' 
+                  : 'flex justify-between'
+              }`}>
+                {showMinimalUI ? (
+                  <span>{Math.round(getProgress())}% concluído</span>
                 ) : (
                   <>
-                    <Play className="mr-4 h-8 w-8" />
-                    Resumir
+                    <span>0:00</span>
+                    <span className="text-center">
+                      {Math.round(getProgress())}% concluído
+                    </span>
+                    <span>{formatTime(totalTimeInSeconds)}</span>
                   </>
                 )}
-              </Button>
-              
-              <Button
-                onClick={stopTimer}
-                size="lg"
-                variant="destructive"
-                className="px-16 py-8 text-2xl font-medium rounded-full transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105"
-              >
-                <RotateCcw className="mr-4 h-8 w-8" />
-                Parar
-              </Button>
+              </div>
             </div>
-          </div>
-        ) : (
-          /* UI Completa - com Card */
-          <Card className="shadow-2xl border bg-card/90 backdrop-blur-sm transition-all duration-700 ease-in-out">
-            <CardHeader className="text-center pb-4">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="transition-all duration-300">
-                  <Clock className="h-4 w-4 mr-1" />
-                  Timer
-                </Badge>
-                
-                <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Configurações do Timer</DialogTitle>
-                      <DialogDescription>
-                        Ajuste o tempo usando os botões abaixo para evitar erros.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-8 py-6">
-                      {/* Horas */}
-                      <div className="space-y-4">
-                        <div className="text-center font-medium">Horas</div>
-                        <div className="flex items-center justify-center gap-4">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('hours', 'subtract')}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <div className="text-3xl font-mono font-bold w-16 text-center">
-                            {hours.toString().padStart(2, '0')}
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('hours', 'add')}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
 
-                      {/* Minutos */}
-                      <div className="space-y-4">
-                        <div className="text-center font-medium">Minutos</div>
-                        <div className="flex items-center justify-center gap-4">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('minutes', 'subtract')}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <div className="text-3xl font-mono font-bold w-16 text-center">
-                            {minutes.toString().padStart(2, '0')}
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('minutes', 'add')}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Segundos */}
-                      <div className="space-y-4">
-                        <div className="text-center font-medium">Segundos</div>
-                        <div className="flex items-center justify-center gap-4">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('seconds', 'subtract')}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <div className="text-3xl font-mono font-bold w-16 text-center">
-                            {seconds.toString().padStart(2, '0')}
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => adjustTime('seconds', 'add')}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" onClick={() => setSettingsOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={applySettings}>
-                        Aplicar
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              
-              <CardTitle className="text-3xl font-light text-foreground mt-2">
-                Pomodoro Timer
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent className="space-y-8 p-8">
-              {/* Timer Display */}
-              <div className="text-center">
-                <div className="text-7xl sm:text-8xl font-mono font-light tracking-tight text-foreground">
-                  {formatTime(timeLeft)}
-                </div>
-                <div className="mt-3 text-lg text-muted-foreground">
-                  {timeLeft === totalTimeInSeconds ? "Pronto para iniciar" : "Configure um tempo para começar"}
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="space-y-3">
-                <Progress 
-                  value={getProgress()} 
-                  className="h-3 transition-all duration-500"
-                />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>0:00</span>
-                  <span className="text-center">
-                    {Math.round(getProgress())}% concluído
-                  </span>
-                  <span>{formatTime(totalTimeInSeconds)}</span>
-                </div>
-              </div>
-
+            {/* Separator - desaparece gradualmente */}
+            <div className={`transition-all duration-600 ease-out ${
+              showMinimalUI 
+                ? 'opacity-0 scale-95 max-h-0 overflow-hidden' 
+                : 'opacity-100 scale-100 max-h-full'
+            }`}>
               <Separator className="my-6" />
+            </div>
 
-              {/* Controls */}
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={startTimer}
-                  size="lg"
-                  disabled={totalTimeInSeconds === 0}
-                  className="px-10 py-6 text-lg font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  <Play className="mr-3 h-6 w-6" />
-                  Iniciar
-                </Button>
-                
-                <Button
-                  onClick={resetTimer}
-                  size="lg"
-                  variant="outline"
-                  className="px-10 py-6 text-lg font-medium rounded-full transition-all duration-300 transform hover:scale-105"
-                >
-                  <RotateCcw className="mr-3 h-6 w-6" />
-                  Resetar
-                </Button>
-              </div>
+            {/* Controls - mudam de tamanho gradualmente */}
+            <div className="flex justify-center gap-4">
+              {showMinimalUI ? (
+                /* Controles grandes para modo minimalista */
+                <>
+                  <Button
+                    onClick={toggleTimer}
+                    size="lg"
+                    className={`transition-all duration-800 ease-out transform px-12 py-6 text-xl font-medium rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 ${
+                      isRunning ? 'bg-yellow-500 hover:bg-yellow-600' : ''
+                    }`}
+                  >
+                    {isRunning ? (
+                      <>
+                        <Pause className="mr-4 h-7 w-7" />
+                        Pausar
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-4 h-7 w-7" />
+                        Resumir
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={stopTimer}
+                    size="lg"
+                    variant="destructive"
+                    className="transition-all duration-800 ease-out transform px-12 py-6 text-xl font-medium rounded-full shadow-2xl hover:shadow-3xl hover:scale-105"
+                  >
+                    <RotateCcw className="mr-4 h-7 w-7" />
+                    Parar
+                  </Button>
+                </>
+              ) : (
+                /* Controles normais para modo completo */
+                <>
+                  <Button
+                    onClick={startTimer}
+                    size="lg"
+                    disabled={totalTimeInSeconds === 0}
+                    className="transition-all duration-800 ease-out transform px-10 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl hover:scale-105"
+                  >
+                    <Play className="mr-3 h-6 w-6" />
+                    Iniciar
+                  </Button>
+                  
+                  <Button
+                    onClick={resetTimer}
+                    size="lg"
+                    variant="outline"
+                    className="transition-all duration-800 ease-out transform px-10 py-6 text-lg font-medium rounded-full hover:scale-105"
+                  >
+                    <RotateCcw className="mr-3 h-6 w-6" />
+                    Resetar
+                  </Button>
+                </>
+              )}
+            </div>
 
-              {/* Tempo configurado */}
+            {/* Tempo configurado - desaparece gradualmente */}
+            <div className={`transition-all duration-600 ease-out ${
+              showMinimalUI 
+                ? 'opacity-0 -translate-y-4 max-h-0 overflow-hidden' 
+                : 'opacity-100 translate-y-0 max-h-full'
+            }`}>
               {totalTimeInSeconds > 0 && (
                 <div className="text-center text-sm text-muted-foreground mt-4">
                   Tempo configurado: {formatTime(totalTimeInSeconds)}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
